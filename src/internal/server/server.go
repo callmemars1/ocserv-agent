@@ -9,6 +9,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type Handler interface {
+	Register(g *echo.Echo)
+}
+
 func Run(ctx context.Context) error {
 	serviceCollection, err := services.Build(ctx)
 	if err != nil {
@@ -17,22 +21,22 @@ func Run(ctx context.Context) error {
 
 	e := echo.New()
 
-	createUserHandler := &handlers.CreateUser{
-		UsersStorage:  serviceCollection.UsersStorage,
-		OcservManager: serviceCollection.OcservManager,
-		CertsManager:  serviceCollection.CertificatesManager,
+	for _, handler := range []Handler{
+		&handlers.HealthCheck{},
+		&handlers.CreateUser{
+			UsersStorage:  serviceCollection.UsersStorage,
+			OcservManager: serviceCollection.OcservManager,
+			CertsManager:  serviceCollection.CertificatesManager,
+		},
+		&handlers.BanUser{
+			UsersStorage: serviceCollection.UsersStorage,
+		},
+		&handlers.UnbanUser{
+			UsersStorage: serviceCollection.UsersStorage,
+		},
+	} {
+		handler.Register(e)
 	}
-	createUserHandler.Register(e)
-
-	banUserHandler := &handlers.BanUser{
-		UsersStorage: serviceCollection.UsersStorage,
-	}
-	banUserHandler.Register(e)
-
-	unbanUserHandler := &handlers.UnbanUser{
-		UsersStorage: serviceCollection.UsersStorage,
-	}
-	unbanUserHandler.Register(e)
 
 	serverAddr := fmt.Sprintf("%s:%d", serviceCollection.Configuration.Host, serviceCollection.Configuration.Port)
 	go func() {
