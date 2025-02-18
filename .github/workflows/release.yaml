@@ -1,0 +1,44 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.0'
+
+      - name: Build
+        run: GOOS=linux GOARCH=amd64 go build -o ocserv-agent ./ocserv-agent/src/cmd/agent
+
+      - name: Read version from file
+        id: get_version
+        run: echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
+
+      - name: Archive binary
+        run: tar -czvf ocserv-agent-${{ env.VERSION }}.tar.gz ocserv-agent
+
+      - name: Create GitHub Tag
+        run: |
+          git tag ${{ env.VERSION }}
+          git push origin ${{ env.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: "Release linux/amd64 ${{ env.VERSION }}"
+          files: ocserv-agent-${{ env.VERSION }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
