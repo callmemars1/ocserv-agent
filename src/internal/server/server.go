@@ -7,6 +7,7 @@ import (
 	"github.com/callmemars1/setka/src/bot/src/internal/server/handlers"
 	"github.com/callmemars1/setka/src/bot/src/internal/services"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type Handler interface {
@@ -20,6 +21,14 @@ func Run(ctx context.Context) error {
 	}
 
 	e := echo.New()
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		KeyLookup: "header:X-Api-Key",
+		Validator: func(key string, c echo.Context) (bool, error) {
+			return key == serviceCollection.Configuration.ApiKey, nil
+		},
+	}))
 
 	for _, handler := range []Handler{
 		&handlers.HealthCheck{},
