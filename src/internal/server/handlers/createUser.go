@@ -8,6 +8,7 @@ import (
 	"github.com/callmemars1/setka/src/bot/src/internal/ocserv"
 	"github.com/callmemars1/setka/src/bot/src/internal/users"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
 
 type CreateUserResponse struct {
@@ -39,6 +40,8 @@ func (h *CreateUser) handle(c echo.Context) error {
 	}
 
 	if existingUser != nil {
+
+		c.Logger().Infoj(log.JSON{"message": "user exists", "username": username})
 		certificateBytes, err := h.CertsManager.ReadClientCertificateP12(existingUser.Username)
 		if err != nil {
 			return c.String(500, err.Error())
@@ -54,6 +57,7 @@ func (h *CreateUser) handle(c echo.Context) error {
 		})
 	}
 
+	c.Logger().Infoj(log.JSON{"message": "user not exists", "username": username})
 	user := &users.User{
 		Username: username,
 		Password: generateNumericPassword(6),
