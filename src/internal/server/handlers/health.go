@@ -14,5 +14,5 @@ func (h *HealthCheck) Register(g *echo.Echo) {
 }
 
 func (h *HealthCheck) handle(c echo.Context) error {
-	return c.JSON(200, "ok")
+	return c.JSON(200, echo.Map{"status": "ok"})
 }

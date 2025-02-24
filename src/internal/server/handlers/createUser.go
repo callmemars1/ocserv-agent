@@ -2,17 +2,13 @@ package handlers
 
 import (
 	"encoding/base64"
+	"math/rand"
 
 	"github.com/callmemars1/setka/src/bot/src/internal/certs"
 	"github.com/callmemars1/setka/src/bot/src/internal/ocserv"
 	"github.com/callmemars1/setka/src/bot/src/internal/users"
 	"github.com/labstack/echo/v4"
 )
-
-type CreateUserRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
 
 type CreateUserResponse struct {
 	Created bool `json:"created"`
@@ -35,13 +31,9 @@ func (h *CreateUser) Register(g *echo.Echo) {
 }
 
 func (h *CreateUser) handle(c echo.Context) error {
-	request := CreateUserRequest{}
+	username := c.Param("username")
 
-	if err := c.Bind(&request); err != nil {
-		return c.String(400, err.Error())
-	}
-
-	existingUser, err := h.UsersStorage.Get(request.Username)
+	existingUser, err := h.UsersStorage.Get(username)
 	if err != nil {
 		return c.String(500, err.Error())
 	}
@@ -63,8 +55,8 @@ func (h *CreateUser) handle(c echo.Context) error {
 	}
 
 	user := &users.User{
-		Username: request.Username,
-		Password: request.Password,
+		Username: username,
+		Password: generateNumericPassword(6),
 		IsBanned: false,
 	}
 
@@ -89,4 +81,13 @@ func (h *CreateUser) handle(c echo.Context) error {
 
 		CertificateBase64: base64.StdEncoding.EncodeToString(certificateBytes),
 	})
+}
+
+func generateNumericPassword(length int) string {
+	digits := "0123456789"
+	password := make([]byte, length)
+	for i := range password {
+		password[i] = digits[rand.Intn(len(digits))]
+	}
+	return string(password)
 }

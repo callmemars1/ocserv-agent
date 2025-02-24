@@ -18,17 +18,17 @@ func (h *BanUser) handle(c echo.Context) error {
 
 	existingUser, err := h.UsersStorage.Get(username)
 	if err != nil {
-		return c.String(500, err.Error())
+		return c.JSON(500, echo.Map{"message": err.Error()})
 	}
 	if existingUser == nil {
-		return c.String(404, "user not found")
+		return c.JSON(404, echo.Map{"message": "user not found"})
 	}
 
 	existingUser.IsBanned = true
 
 	if err := h.UsersStorage.Save(existingUser); err != nil {
-		return c.String(500, err.Error())
+		return c.JSON(500, echo.Map{"message": err.Error()})
 	}
 
-	return c.JSON(200, "user banned")
+	return c.JSON(200, echo.Map{"message": "user banned", "username": username})
 }

@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	clientCertName   = "cert.pem"
-	metadataFileName = "metadata.json"
+	clientCertName = "cert.pem"
 )
 
 type Configuration struct {
