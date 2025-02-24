@@ -37,6 +37,11 @@ func Run(ctx context.Context) error {
 			OcservManager: serviceCollection.OcservManager,
 			CertsManager:  serviceCollection.CertificatesManager,
 		},
+		&handlers.GetUser{
+			UsersStorage:  serviceCollection.UsersStorage,
+			OcservManager: serviceCollection.OcservManager,
+			CertsManager:  serviceCollection.CertificatesManager,
+		},
 		&handlers.BanUser{
 			UsersStorage: serviceCollection.UsersStorage,
 		},
