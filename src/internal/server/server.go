@@ -6,6 +6,7 @@ import (
 
 	"github.com/callmemars1/setka/src/bot/src/internal/server/handlers"
 	"github.com/callmemars1/setka/src/bot/src/internal/services"
+	"github.com/callmemars1/setka/src/bot/src/internal/tasks"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -58,6 +59,10 @@ func Run(ctx context.Context) error {
 			fmt.Println("Server error:", err)
 		}
 	}()
+	go (&tasks.Ban{
+		UsersStorage:  serviceCollection.UsersStorage,
+		OcservManager: serviceCollection.OcservManager,
+	}).Run(ctx)
 
 	<-ctx.Done()
 	fmt.Println("Shutting down server...")

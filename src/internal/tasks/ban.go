@@ -9,8 +9,8 @@ import (
 )
 
 type Ban struct {
-	usersStorage  *users.Storage
-	ocservManager *ocserv.Manager
+	UsersStorage  *users.Storage
+	OcservManager *ocserv.Manager
 }
 
 func (t *Ban) Run(ctx context.Context) error {
@@ -20,13 +20,13 @@ func (t *Ban) Run(ctx context.Context) error {
 	for {
 		select {
 		case <-ticker.C:
-			users, err := t.usersStorage.GetAll()
+			users, err := t.UsersStorage.GetAll()
 			if err != nil {
 				continue
 			}
 			for _, user := range users {
 				if user.IsBanned {
-					if err := t.ocservManager.DisconnectUser(user.Username); err != nil {
+					if err := t.OcservManager.DisconnectUser(user.Username); err != nil {
 						continue
 					}
 				}
